@@ -1,1 +1,1 @@
-export const sprite_player = 'C:\Users\dioni\OneDrive\Documentos\Facu\Quarto Semestre\Programação Orientada a Objetos - POO\game_dino\Sprites\NNdymc3C7ovu35tAM6KjzCAYVuE7BH-N9pMhMF4MzQzFKRFi2XRt7dgAEHQ3AthgFXmQRev_cbdkvq7eIu2jcsyZO0PG7BFIzIdS4ua4qBZHbCdLgdMskHA68QG.jpg';
+export const sprite_player = 'Sprites/NNdymc3C7ovu35tAM6KjzCAYVuE7BH-N9pMhMF4MzQzFKRFi2XRt7dgAEHQ3AthgFXmQRev_cbdkvq7eIu2jcsyZO0PG7BFIzIdS4ua4qBZHbCdLgdMskHA68QG.jpg';
