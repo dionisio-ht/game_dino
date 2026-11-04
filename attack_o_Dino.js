@@ -1,3 +1,5 @@
+import { sprite_player } from "./constantes.js";
+
 /*classe Abstrata (não existe uma palavra chave, apenas simulando
 utilizando o new.target, que impede a instanciação de objetos 
 e lança erros em métodos que precisam ser implementados pelas 
@@ -7,7 +9,6 @@ class Objetogame {
         if(new.target === Objetogame){
             throw new Error("Nao eh possivel gerar um objeto dessa classe!");
         }
-
         this.x = x;
         this.y = y;
         this.largura = largura;
@@ -15,6 +16,10 @@ class Objetogame {
     }
     
     desenhar(ctx) {
+        throw new Error("Não é possivel realizar esse método com esse objeto!");
+    }
+
+    pegarImagem(){
         throw new Error("Não é possivel realizar esse método com esse objeto!");
     }
 
@@ -30,6 +35,7 @@ class Player extends Objetogame{
         this.velocidadeY = 0;
         this.gravidade = 0.7;
         this.estaPulando = false;
+        this.sprite = this.pegarImagem(sprite_player);
     }
 
     pular(){
@@ -52,8 +58,15 @@ class Player extends Objetogame{
     }
 
     desenhar(ctx){
-        ctx.fillStyle = "#5a17a7";
-        ctx.fillRect(this.x, this.y, this.largura, this.altura);
+        //ctx.fillStyle = "#5a17a7";
+        //ctx.fillRect(this.x, this.y, this.largura, this.altura);
+        ctx.drawImage(this.sprite, this.x, this.y, this.largura, this.altura);
+    }
+
+    pegarImagem(caminho){
+        const imagem = new Image()
+        imagem.src = caminho;
+        return imagem;
     }
 }
 
@@ -78,20 +91,14 @@ class Jogo{
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.scoreElement = document.getElementById('score');
-        this.obstaculos = [];
+        this.startScreen = document.getElementById('startScreen');
+        this.gameOverScreen = document.getElementById('gameOverScreen');
         this.resetar();
-        //this.startScreen = document.getElementById('startScreen');
-        //this.gameOverScreen = document.getElementById('gameOverScreen');
-        //this.escutarTeclas();
-        //this.resetar();
-    }
-
-    escutarTeclas(){
-
+        this.escutarTeclas();
     }
 
     resetar() {
-        this.dino = new Player(50, 180, 30, 50);
+        this.dino = new Player(50, 192, 49, 38);
         this.obstaculos = [];
         this.emExecucao = false;
         this.gameOver = false;
@@ -100,15 +107,13 @@ class Jogo{
         this.tempoObs = 0;
         this.score = 0;
         this.ultimotempo = 0;
-        this.loop;
-
     }
 
     iniciar(){
         this.resetar();
         this.emExecucao = true;
-        this.tempo = 0;
-        this.ultimotempo = 0;
+        this.startScreen.classList.add('hidden');
+        this.gameOverScreen.classList.add('hidden');
         /* "=>" é a abreviação de "function", além disso, 
         em casos de jogos, utilizar function faz com que 
         o JavaScript perdesse em algum momento o "this", 
@@ -116,9 +121,21 @@ class Jogo{
         requestAnimationFrame((timestamp) => this.loop(timestamp));
     }
 
+    escutarTeclas() {
+        window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+            if (!this.emExecucao) {
+            this.iniciar();
+            } else {
+            this.dino.pular();
+            }
+        }
+        });
+    }    
+
     gerarObstaculo(temporizador){
         this.tempoObs += temporizador;
-        if(this.tempoObs >= 0.5){
+        if(this.tempoObs >= 0.5 && !this.evento10SegundosAtivado){
             this.tempoObs = 0;
             const alturaCacto = Math.floor(Math.random() * 20) + 30;
             const yCacto = 230 - alturaCacto;
@@ -128,13 +145,28 @@ class Jogo{
         }
     }
 
-    loop(timestamp) {
-    // Se o jogo parou, interrompe o loop
-    if (!this.emExecucao) return;
+    checarColisao(dino, obs) {
+        return (
+            dino.x < obs.x + obs.largura &&
+            dino.x + dino.largura > obs.x &&
+            dino.y < obs.y + obs.altura &&
+            dino.y + dino.altura > obs.y
+        );
+    }
 
-    // Calcula o tempo decorrido entre os quadros
-    if (this.ultimotempo === 0) {
-        this.ultimotempo = timestamp;
+    finalizarJogo() {
+        this.gameOver = true;
+        this.emExecucao = false;
+        this.gameOverScreen.classList.remove('hidden');
+    }
+
+    loop(timestamp) {
+        // Se o jogo parou, interrompe o loop
+        if (!this.emExecucao) return;
+
+        // Calcula o tempo decorrido entre os quadros
+        if (this.ultimotempo === 0) {
+            this.ultimotempo = timestamp;
     }
 
     const temporizador = Math.min((timestamp - this.ultimotempo) / 1000, 0.5);
@@ -154,7 +186,9 @@ class Jogo{
     // Evento de exemplo: ocorre uma única vez aos 10 segundos
         if (this.tempo >= 10 && !this.evento10SegundosAtivado) {
             this.evento10SegundosAtivado = true;
-            console.log("10 segundos! Evento ativado!");
+            this.obstaculos.push(
+                new Obstaculo(this.canvas.width, 0, this.canvas.width, this.canvas.height, 1)
+            );
         }
 
     this.gerarObstaculo(temporizador);
@@ -167,21 +201,25 @@ class Jogo{
             this.dino.atualizar(); 
             this.dino.desenhar(this.ctx); 
         }
-
-    for (const obstaculo of this.obstaculos){
-        obstaculo.atualizar();
-        obstaculo.desenhar(this.ctx);
-    }
     
-    this.obstaculos = this.obstaculos.filter(
+    //realiza uma funçao para cada obstaculo na lista de obstaculos
+    this.obstaculos.forEach((obs, index) => {
+        obs.atualizar();
+        obs.desenhar(this.ctx);
+
+        /*realiza uma filtragem nos obstaculos presentes
+        na lista de obstaculos retornando outra lista
+        com os obstaculos que passaram no teste*/
+        this.obstaculos = this.obstaculos.filter(
             (obstaculo) => obstaculo.x + obstaculo.largura >= 0
-    ); 
+        ); 
 
-    //teste para ver se o Player esta pulando
-    this.dino.pular();
+        //chama a funçao para checar a colisao do player com um obstaculo
+        if (this.checarColisao(this.dino, obs)) {
+        this.finalizarJogo();
+        }
 
-    
-
+    })
 
     //Pede para o navegador rodar o próximo quadro da animação
     requestAnimationFrame((timestamp) => this.loop(timestamp));
@@ -191,5 +229,4 @@ class Jogo{
 // Inicializa a instância do jogo quando a página carregar
 window.onload = () => {
   const jogo = new Jogo("gameCanvas");
-  jogo.iniciar();
 };
