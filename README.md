@@ -4,6 +4,8 @@ Este trabalho tem como foco enternder a linguagem de programação JavaScript.
 
 Desenvolvedores:
 
+Bruno Ribeiro Ramos / estaqueo / Brunoribeiroramos180104@gmail.com
+
 Dionisio Neto / dionisio-ht / dionisio.martins.neto2006@gmail.com;
 
 Kaiky Mattos / Atlas1155 / mattoskaiky@gmail.com;
