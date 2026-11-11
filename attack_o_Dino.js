@@ -1,4 +1,4 @@
-import { sprite_player } from "./constantes.js";
+import { sprite_asteroide, sprite_obstaculo, sprite_player2 } from "./constantes.js";
 
 /*classe Abstrata (não existe uma palavra chave, apenas simulando
 utilizando o new.target, que impede a instanciação de objetos 
@@ -15,16 +15,18 @@ class Objetogame {
         this.altura = altura;
     }
     
-    desenhar(ctx) {
-        throw new Error("Não é possivel realizar esse método com esse objeto!");
-    }
-
-    pegarImagem(){
-        throw new Error("Não é possivel realizar esse método com esse objeto!");
-    }
-
     atualizar(){
         throw new Error("Não é possivel realizar esse método com esse objeto!");
+    }
+
+    desenhar(ctx) {
+       ctx.drawImage(this.sprite, this.x, this.y, this.largura, this.altura);
+    }
+
+    pegarImagem(caminho){
+        const imagem = new Image()
+        imagem.src = caminho;
+        return imagem;
     }
 }
 
@@ -33,9 +35,9 @@ class Player extends Objetogame{
         super(x, y, largura, altura);
         this.yInicial = y;
         this.velocidadeY = 0;
-        this.gravidade = 0.7;
+        this.gravidade = 0.5;
         this.estaPulando = false;
-        this.sprite = this.pegarImagem(sprite_player);
+        this.sprite = this.pegarImagem(sprite_player2);
     }
 
     pular(){
@@ -57,32 +59,35 @@ class Player extends Objetogame{
         }
     }
 
+    /*
     desenhar(ctx){
         //ctx.fillStyle = "#5a17a7";
         //ctx.fillRect(this.x, this.y, this.largura, this.altura);
         ctx.drawImage(this.sprite, this.x, this.y, this.largura, this.altura);
-    }
-
-    pegarImagem(caminho){
-        const imagem = new Image()
-        imagem.src = caminho;
-        return imagem;
-    }
+    }*/
 }
 
 class Obstaculo extends Objetogame{
     constructor(x, y, largura, altura, velocidade){
         super(x, y, largura, altura);
         this.velocidade = velocidade;
+        this.sprite = this.pegarImagem(sprite_obstaculo);
     }
 
     atualizar(){
         this.x -= this.velocidade;
     }
+}
 
-    desenhar(ctx){
-        ctx.fillStyle = "#ff0202";
-        ctx.fillRect(this.x, this.y, this.largura, this.altura);
+class Asteroide extends Objetogame{
+    constructor(x, y, largura, altura, velocidade, sprite){
+        super(x, y, largura, altura);
+        this.velocidade = velocidade;
+        this.sprite = this.pegarImagem(sprite);
+    }
+
+    atualizar(){
+        this.x -= this.velocidade;
     }
 }
 
@@ -98,7 +103,7 @@ class Jogo{
     }
 
     resetar() {
-        this.dino = new Player(50, 192, 49, 38);
+        this.dino = new Player(50, 192, 63, 47);
         this.obstaculos = [];
         this.emExecucao = false;
         this.gameOver = false;
@@ -135,13 +140,18 @@ class Jogo{
 
     gerarObstaculo(temporizador){
         this.tempoObs += temporizador;
-        if(this.tempoObs >= 0.5 && !this.evento10SegundosAtivado){
+        if(this.tempoObs >= 1 && !this.evento10SegundosAtivado){
             this.tempoObs = 0;
-            const alturaCacto = Math.floor(Math.random() * 20) + 30;
-            const yCacto = 230 - alturaCacto;
-            this.obstaculos.push(
-                new Obstaculo(this.canvas.width, yCacto, 20, alturaCacto, 6)
-            );
+
+
+
+
+
+            //const alturaCacto = Math.floor(Math.random() * 20) + 30;
+            //const yCacto = 230 - alturaCacto;
+            //this.obstaculos.push(
+                //new Obstaculo(this.canvas.width, yCacto, 32, alturaCacto, 6)
+            //);
         }
     }
 
@@ -187,7 +197,7 @@ class Jogo{
         if (this.tempo >= 10 && !this.evento10SegundosAtivado) {
             this.evento10SegundosAtivado = true;
             this.obstaculos.push(
-                new Obstaculo(this.canvas.width, 0, this.canvas.width, this.canvas.height, 1)
+                new Asteroide(this.canvas.width, 0, this.canvas.width, this.canvas.height, 1)
             );
         }
 
