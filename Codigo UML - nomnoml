@@ -1,0 +1,64 @@
+[<abstract> Objetogame |
+	x : Number
+    y : Number
+    largura : Number
+	altura : Number
+    |
+    constructor() : void
+    desenhar() : void
+    pegarImagem() : Image
+    atualizar() : void
+]
+
+[Player | 
+	yInicial : Number
+	velocidadeY : Number
+	gravidade : Number
+	estaPulando : Boolean
+	sprite : Image
+    |
+    constructor() : void
+    desenhar() : void
+    pegarImagem() : Image
+    atualizar() : void
+    pular() : void
+]
+
+[Obstaculo |
+	velocidade : Number
+    |
+    constructor() : void
+    desenhar() : void
+    pegarImagem() : Image
+    atualizar() : void
+]
+
+[Jogo |
+	canvas : Canvas
+    ctx : Canvas
+    scoreElement : Element
+    startScreen : Element 
+    gameOverScreen : Element
+    // Element são apenas elementos dentro do HTML
+    dino : Player
+    obstaculos : List<Obstaculo>
+    emExecucao : Boolean
+    gameOver : Boolean
+    evento10SegundosAtivado : Boolean
+    tempo : Number
+    tempoObs : Number
+    score : Number
+    ultimotempo : Number
+    |
+    resetar() : void
+    iniciar() : void
+    escutarTeclas() : void
+    gerarObstaculo() : void
+	checarColisao() : Boolean
+    finalizarJogo() : void
+    loop() : void
+]
+
+[Player] -:> [Objetogame] <:- [Obstaculo]
+[Player] -+ [Jogo]
+[Jogo] o- [Obstaculo]
