@@ -11,6 +11,8 @@ export class Sprite {
     }
 
     // Sprite estático não muda com o tempo
+    // chama atualizar e reiniciar sem precisar saber qual dos dois esta atuando ( "polimorfismo" )
+    
     atualizar(temporizador) {}
 
     reiniciar() {}
