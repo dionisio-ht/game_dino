@@ -59,6 +59,6 @@
     loop() : void
 ]
 
-[Player] -> [Objetogame] <- [Obstaculo]
-[Player] -+ [Jogo] +- [Obstaculo]
+[Player] -:> [Objetogame] <:- [Obstaculo]
+[Player] -+ [Jogo]
 [Jogo] o- [Obstaculo]
