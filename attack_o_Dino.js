@@ -1,4 +1,5 @@
-import { sprite_asteroide, sprite_obstaculo, sprite_player2 } from "./constantes.js";
+import { sprite_asteroide, sprite_bolafeno, sprite_cacto, sprite_player2, sprite_predio } from "./constantes.js";
+import { Sprite, SpriteAnimado, Animador } from "./animacao.js";
 
 /*classe Abstrata (não existe uma palavra chave, apenas simulando
 utilizando o new.target, que impede a instanciação de objetos 
@@ -19,14 +20,13 @@ class Objetogame {
         throw new Error("Não é possivel realizar esse método com esse objeto!");
     }
 
+    // this.sprite pode ser Sprite, SpriteAnimado ou Animador (polimorfismo)
     desenhar(ctx) {
-       ctx.drawImage(this.sprite, this.x, this.y, this.largura, this.altura);
+        this.sprite.desenhar(ctx, this.x, this.y, this.largura, this.altura);
     }
 
     pegarImagem(caminho){
-        const imagem = new Image()
-        imagem.src = caminho;
-        return imagem;
+        return new Sprite(caminho);
     }
 }
 
@@ -37,17 +37,26 @@ class Player extends Objetogame{
         this.velocidadeY = 0;
         this.gravidade = 0.5;
         this.estaPulando = false;
-        this.sprite = this.pegarImagem(sprite_player2);
+
+        /* Composição: o Player "tem" um Animador com suas animações.
+        Para animar, troque por uma spritesheet, ex.:
+        new SpriteAnimado("Sprites/dino_correndo.png", 4, 10)
+        (4 quadros lado a lado, 10 quadros por segundo). */
+        this.sprite = new Animador({
+            correndo: new SpriteAnimado("Sprites/dino_correndo.png", 3, 10),
+            // 0 quadros por segundo: fica parado no primeiro quadro
+            pulando: new SpriteAnimado("Sprites/dino_correndo.png", 3, 0),
+        }, "correndo");
     }
 
     pular(){
         if(!this.estaPulando){
-            this.velocidadeY = -12;
+            this.velocidadeY = -15;
             this.estaPulando = true;
         }
     }
 
-    atualizar(){
+    atualizar(temporizador){
         this.y += this.velocidadeY;
 
         if(this.y < this.yInicial){
@@ -57,6 +66,9 @@ class Player extends Objetogame{
             this.velocidadeY = 0;
             this.estaPulando = false;
         }
+
+        this.sprite.trocar(this.estaPulando ? "pulando" : "correndo");
+        this.sprite.atualizar(temporizador);
     }
 
     /*
@@ -68,18 +80,6 @@ class Player extends Objetogame{
 }
 
 class Obstaculo extends Objetogame{
-    constructor(x, y, largura, altura, velocidade){
-        super(x, y, largura, altura);
-        this.velocidade = velocidade;
-        this.sprite = this.pegarImagem(sprite_obstaculo);
-    }
-
-    atualizar(){
-        this.x -= this.velocidade;
-    }
-}
-
-class Asteroide extends Objetogame{
     constructor(x, y, largura, altura, velocidade, sprite){
         super(x, y, largura, altura);
         this.velocidade = velocidade;
@@ -103,7 +103,7 @@ class Jogo{
     }
 
     resetar() {
-        this.dino = new Player(50, 192, 63, 47);
+        this.dino = new Player(50, 180, 47, 50);
         this.obstaculos = [];
         this.emExecucao = false;
         this.gameOver = false;
@@ -140,18 +140,36 @@ class Jogo{
 
     gerarObstaculo(temporizador){
         this.tempoObs += temporizador;
+        const obstaculosDisponiveis = [
+            sprite_bolafeno,
+            sprite_cacto,
+            sprite_predio
+        ];
         if(this.tempoObs >= 1 && !this.evento10SegundosAtivado){
             this.tempoObs = 0;
+            const indice = Math.floor(
+            Math.random() * obstaculosDisponiveis.length
+            );
+            const spriteescolida = obstaculosDisponiveis[indice];
 
-
-
-
-
-            //const alturaCacto = Math.floor(Math.random() * 20) + 30;
-            //const yCacto = 230 - alturaCacto;
-            //this.obstaculos.push(
-                //new Obstaculo(this.canvas.width, yCacto, 32, alturaCacto, 6)
-            //);
+            if(indice == 0){
+                this.obstaculos.push(
+                    new Obstaculo(this.canvas.width, 210, 32, 32, 6, spriteescolida)
+                );
+            }
+            else if (indice == 1){
+                this.obstaculos.push(
+                    new Obstaculo(this.canvas.width, 180, 64, 64, 6, spriteescolida)
+                );
+            }
+            else if (indice == 2){
+                this.obstaculos.push(
+                    new Obstaculo(this.canvas.width, 130, 128, 128, 6, spriteescolida)
+                );
+            }
+            else {
+                throw new Error("Erro na criação do objeto!");
+            }
         }
     }
 
@@ -197,7 +215,7 @@ class Jogo{
         if (this.tempo >= 10 && !this.evento10SegundosAtivado) {
             this.evento10SegundosAtivado = true;
             this.obstaculos.push(
-                new Asteroide(this.canvas.width, 0, this.canvas.width, this.canvas.height, 1)
+                new Obstaculo(this.canvas.width, 0, 512, 512, 1, sprite_asteroide)
             );
         }
 
@@ -206,30 +224,36 @@ class Jogo{
     //Limpa o canvas para desenhar o próximo quadro
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // Desenha a linha do chão
+    this.ctx.strokeStyle = '#e0e0e0';
+    this.ctx.lineWidth = 2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, 230);
+    this.ctx.lineTo(this.canvas.width, 230);
+    this.ctx.stroke();
+
     //Atualiza e desenha o Player (Dino)
     if (this.dino) {
-            this.dino.atualizar(); 
+            this.dino.atualizar(temporizador); 
             this.dino.desenhar(this.ctx); 
         }
     
     //realiza uma funçao para cada obstaculo na lista de obstaculos
-    this.obstaculos.forEach((obs, index) => {
+    this.obstaculos.forEach((obs) => {
         obs.atualizar();
         obs.desenhar(this.ctx);
 
-        /*realiza uma filtragem nos obstaculos presentes
-        na lista de obstaculos retornando outra lista
-        com os obstaculos que passaram no teste*/
-        this.obstaculos = this.obstaculos.filter(
-            (obstaculo) => obstaculo.x + obstaculo.largura >= 0
-        ); 
-
         //chama a funçao para checar a colisao do player com um obstaculo
         if (this.checarColisao(this.dino, obs)) {
-        this.finalizarJogo();
+            this.finalizarJogo();
         }
+    });
 
-    })
+    /*filtra uma vez por quadro, mantendo só os obstaculos
+    que ainda estão na tela*/
+    this.obstaculos = this.obstaculos.filter(
+        (obstaculo) => obstaculo.x + obstaculo.largura >= 0
+    );
 
     //Pede para o navegador rodar o próximo quadro da animação
     requestAnimationFrame((timestamp) => this.loop(timestamp));
