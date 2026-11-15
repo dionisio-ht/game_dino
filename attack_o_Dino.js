@@ -1,8 +1,5 @@
 import { sprite_asteroide, sprite_bolafeno, sprite_cacto, sprite_player2, sprite_predio } from "./constantes.js";
-<<<<<<< Updated upstream
 import { Sprite, SpriteAnimado, Animador } from "./animacao.js";
-=======
->>>>>>> Stashed changes
 
 /*classe Abstrata (não existe uma palavra chave, apenas simulando
 utilizando o new.target, que impede a instanciação de objetos 
