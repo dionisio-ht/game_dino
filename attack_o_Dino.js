@@ -1,5 +1,8 @@
 import { sprite_asteroide, sprite_bolafeno, sprite_cacto, sprite_player2, sprite_predio } from "./constantes.js";
+<<<<<<< Updated upstream
 import { Sprite, SpriteAnimado, Animador } from "./animacao.js";
+=======
+>>>>>>> Stashed changes
 
 /*classe Abstrata (não existe uma palavra chave, apenas simulando
 utilizando o new.target, que impede a instanciação de objetos 
@@ -70,13 +73,6 @@ class Player extends Objetogame{
         this.sprite.trocar(this.estaPulando ? "pulando" : "correndo");
         this.sprite.atualizar(temporizador);
     }
-
-    /*
-    desenhar(ctx){
-        //ctx.fillStyle = "#5a17a7";
-        //ctx.fillRect(this.x, this.y, this.largura, this.altura);
-        ctx.drawImage(this.sprite, this.x, this.y, this.largura, this.altura);
-    }*/
 }
 
 class Obstaculo extends Objetogame{
