@@ -1,64 +1,105 @@
+
+
 [<abstract> Objetogame |
 	x : Number
-    y : Number
-    largura : Number
+	y : Number
+	largura : Number
 	altura : Number
-    |
-    constructor() : void
-    desenhar() : void
-    pegarImagem() : Image
-    atualizar() : void
+	sprite : Sprite
+	|
+	constructor() : void
+	desenhar() : void
+	pegarImagem() : Sprite
+	atualizar() : void
 ]
 
-[Player | 
+[Player |
 	yInicial : Number
 	velocidadeY : Number
 	gravidade : Number
 	estaPulando : Boolean
-	sprite : Image
-    |
-    constructor() : void
-    desenhar() : void
-    pegarImagem() : Image
-    atualizar() : void
-    pular() : void
+	sprite : Animador
+	|
+	constructor() : void
+	atualizar() : void
+	pular() : void
 ]
 
 [Obstaculo |
 	velocidade : Number
-    |
-    constructor() : void
-    desenhar() : void
-    pegarImagem() : Image
-    atualizar() : void
+	sprite : Sprite
+	|
+	constructor() : void
+	atualizar() : void
+]
+
+[SpriteAnimado |
+	totalQuadros : Number
+	duracaoQuadro : Number
+	quadroAtual : Number
+	acumulado : Number
+	|
+	constructor() : SpriteAnimado
+	reiniciar() : void
+	atualizar() : void
+	desenhar() : void
 ]
 
 [Jogo |
 	canvas : Canvas
-    ctx : Canvas
-    scoreElement : Element
-    startScreen : Element 
-    gameOverScreen : Element
-    // Element são apenas elementos dentro do HTML
-    dino : Player
-    obstaculos : List<Obstaculo>
-    emExecucao : Boolean
-    gameOver : Boolean
-    evento10SegundosAtivado : Boolean
-    tempo : Number
-    tempoObs : Number
-    score : Number
-    ultimotempo : Number
-    |
-    resetar() : void
-    iniciar() : void
-    escutarTeclas() : void
-    gerarObstaculo() : void
+	ctx : Canvas
+	scoreElement : Element
+	startScreen : Element
+	gameOverScreen : Element
+	//Element são apenas elementos dentro do HTML
+	dino : Player
+	obstaculos : List<Obstaculo>
+	emExecucao : Boolean
+	gameOver : Boolean
+	evento10SegundosAtivado : Boolean
+	tempo : Number
+	tempoObs : Number
+	score : Number
+	ultimotempo : Number
+	|
+	constructor() : Jogo
+	resetar() : void
+	iniciar() : void
+	escutarTeclas() : void
+	gerarObstaculo() : void
 	checarColisao() : Boolean
-    finalizarJogo() : void
-    loop() : void
+	finalizarJogo() : void
+	loop() : void
 ]
 
-[Player] -:> [Objetogame] <:- [Obstaculo]
+[Animador |
+	animacoes : List<SpriteAnimado>
+	atual : SpriteAnimado
+	|
+	constructor() : Animador
+	trocar() : void
+	atualizar() : void
+	desenhar() : void
+]
+
+[Sprite |
+	imagem : Image
+	|
+	constructor() : Sprite
+	carregado() : Boolean
+	atualizar() : void
+	reiniciar() : void
+	desenhar() : void
+]
+
+//herança
+[Player] -:> [Objetogame]
+[Obstaculo] -:> [Objetogame]
+[SpriteAnimado] -:> [Sprite]
+
+//composição e agregação
+[Player] +- [Animador]
+[Sprite] -+ [Obstaculo]
+[Animador] +- [SpriteAnimado]
 [Player] -+ [Jogo]
-[Jogo] o- [Obstaculo]
+[Jogo] o- [Obstaculo] 
