@@ -38,10 +38,7 @@ class Player extends Objetogame{
         this.gravidade = 0.5;
         this.estaPulando = false;
 
-        /* Composição: o Player "tem" um Animador com suas animações.
-        Para animar, troque por uma spritesheet, ex.:
-        new SpriteAnimado("Sprites/dino_correndo.png", 4, 10)
-        (4 quadros lado a lado, 10 quadros por segundo). */
+        /* Composição: o Player "tem" um Animador com suas animações. */
         this.sprite = new Animador({
             correndo: new SpriteAnimado("Sprites/dino_correndo.png", 3, 10),
             // 0 quadros por segundo: fica parado no primeiro quadro
